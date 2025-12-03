@@ -2,9 +2,16 @@
 
 # Import the required modules
 from flask import Flask, render_template, request, url_for
+import secrets
+
+from registration import RegistrationForm
 
 # Declare and create/instantiate a flask object
 app = Flask(__name__)
+
+# Application configurations
+# 1. Create the application's secret key to protect our stie from CSRF attacks
+app.config['SECRET_KEY'] = secrets.token_urlsafe(32) # app_key = secrets.token_hex(18)
 
 
 # Set the route to the index/home page
@@ -31,6 +38,14 @@ def index():
 
    # Display the home page and pass the user_agent variable to it
    return render_template('index.html', user_agent=user_agent)
+
+
+# Route to the registration/sign-up page
+@app.route('/register',methods=['GET','POST'])
+@app.route('/sign-up',methods=['GET','POST'])
+def register():
+   form = RegistrationForm()
+   return render_template('registration.html', form=form)
 
 
 # Set the route to the user's page
