@@ -1,7 +1,7 @@
 # Python script to act as the launch point to our Flask web application
 
 # Import the required modules
-from flask import Flask, render_template, request, url_for
+from flask import Flask, render_template, request, url_for,flash
 import secrets
 
 from registration import RegistrationForm
@@ -40,20 +40,48 @@ def index():
    return render_template('index.html', user_agent=user_agent)
 
 
-# Route to the registration/sign-up page
-@app.route('/register',methods=['GET','POST'])
-@app.route('/sign-up',methods=['GET','POST'])
-def register():
-   form = RegistrationForm()
-   return render_template('registration.html', form=form)
-
-
 # Set the route to the user's page
 @app.route('/user')
 @app.route('/user/<username>')
 def user(username=None):
    return render_template('user.html', username=username)
 
+# Route to the register/sign-up page
+@app.route('/register',methods=['GET','POST'])
+@app.route('/sign-up',methods=['GET','POST'])
+def register():
+   form = RegistrationForm()
+   if form.validate_on_submit():
+      # Process the form data(e.g., save to a database & so on)
+      flash("Registration or Sign-up successful","success")
+      return redirect(url_for('success')) # Redirect to a success page
+   else:
+      # Flash validation errors
+      for field, errors in form.errors.items():
+         for error in errors:
+            flash(f"Error in {getattr(form,field).label.text}: {error}","danger")
+   return render_template('register.html',form=form)
+
+# Route to the login/sign-in page
+@app.route('/login',methods=['GET','POST'])
+@app.route('/sign-in',methods=['GET','POST'])
+def login():
+   form = LoginForm()
+   if form.validate_on_submit():
+      # Process the form data (e.g. redirect to inbox, checkout, view post or friend profile & so on)
+      flash("Login or Sign-in Successful","success")
+      return redirect(url_for('success')) # Redirect to the success page
+   else:
+      # Flash validation errors
+      for field, errors in form.errors.items():
+         for error in errors:
+            flash(f"Error in {getattr(form,field).label.text}: {error}","danger")
+   return render_template('login.html',form=form)
+
+# Route to the success page
+@app.route('/success')
+def success():
+   return render_template('success.html')
 
 # Pages to handle site errors
 # 1. Handle when authentication is required and has not been provided or failed (401 error)
