@@ -1,0 +1,19 @@
+{# The DS 2505 products catalogue page #}
+{# Inherit the code from the base template #}
+{% extends 'base.html' %}
+{# specify the page title #}
+{% block page_title %} Product List{% endblock page_title %}
+{% block page_heading %}
+    Welcome to the DS 2505 Product Catalogue
+{% endblock %}
+
+{% block page_content %}
+    {# Display the list of products #}
+    <ul>
+    {% for product in products %}
+        <li> {{ product.name }}: Kes. {{ product.price }}</li>
+        {# TODO: Add the links for editing/updating and deleting the product #}
+    {% endfor %}
+    </ul>
+    {# TODO: Add the link to add a new product #}
+{% endblock %}
