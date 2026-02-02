@@ -1,20 +1,27 @@
 # Python script to act as the launch point to our Flask web application
+import string
 
 # Import the required modules
 from flask import Flask, render_template, request, url_for, flash, redirect
+from flask_login import current_user, LoginManager
+from flask_login import login_user, logout_user, login_required # For application authentication & authorisation
 import secrets
+import string
 
-# Import the registration and login form modules
-from registration import RegistrationForm
+# Import the registration, login and product form modules
+from register import RegistrationForm
 from login import LoginForm
+from product_form import ProductForm
 
 # Import the database models
-from models import Product, init_db, db
+from models import Product, init_db, db, User, Role, UserRole
+from seed_products_users_roles import seed_all
+
 # Declare and create/instantiate a flask object
 app = Flask(__name__)
 
 # Application configurations
-# 1. Create the application's secret key to protect our stie from CSRF attacks
+# 1. Create the application's secret key to protect our site from CSRF attacks
 app.config['SECRET_KEY'] = secrets.token_urlsafe(32)  # app_key = secrets.token_hex(18)
 
 # 2. Specify the path/URI to the sqlite database file
@@ -23,6 +30,49 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ds2505.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Initialise the database
 init_db(app)
+seed_all(app)
+
+# Setup Flask_login for the application's login functionality
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+@login_manager.user_loader
+def load_user(user_id):
+   return User.query.get(int(user_id))
+
+# Create a guest user to access our unprotected site areas anonymously (unauthenticated access)
+class GuestUser:
+   def __init__(self):
+      self.full_name = "Guest"
+      self.is_authenticated = False
+      self.is_active = False
+      self.is_anonymous = True
+
+   def is_admin_or_manager(self):
+      return False
+
+   def get_id(self):
+      return None
+
+# Function to get the user object for the current user, if the current user is authenticated, else
+# it returns a Guest object
+@app.context_processor
+def inject_user():
+   if current_user.is_authenticated:
+      return {"current_user": current_user}
+   else:
+      return {"current_user": GuestUser()}
+
+# Function to generate the prefix for the product ids when adding new products in the product's table
+def generate_product_id():
+   prefix = '01H73QEWM'
+   alphabet = string.ascii_uppercase + string.digits
+   while True:
+      suffix = "".join(secrets.choice(alphabet) for _ in range(8))
+      candidate = prefix + suffix
+      if Product.query.get(candidate) is None: # when the product Id doesn't exist in the 'product' table
+         return candidate
 
 
 # Set the route to the index/home page
@@ -97,12 +147,57 @@ def login():
 def success():
    return render_template('success.html')
 
+
 # Route to the product's page (used to display all products in the table)
 @app.route('/products')
 def products():
    # Get all the products from the products table in the ds2505 database
    products = Product.query.all()
    return render_template('products.html', products=products)
+
+
+# Route to the add product page (used to add an item/product to the product table)
+@app.route('/add_product', methods=['GET', 'POST'])
+def add_product():
+   form = ProductForm()
+   if form.validate_on_submit():
+      new_product = Product(
+         id=form.name.data.replace(' ', '').upper(),
+         name=form.name.data,
+         price=form.price.data,
+      )
+      # Add and persist the new product to the database
+      db.session.add(new_product)
+      db.session.commit()
+      return redirect(url_for('products'))
+   return render_template('add-product.html', form=form)
+
+
+# Route to the edit product page (used to modify/change an item in the product list/catalogue)
+@app.route("/edit_product/<string:id>", methods=['GET', 'POST'])
+def edit_product(id):
+   product = Product.query.get(id)
+   if product is None:
+      return redirect(url_for('products'))
+   form = ProductForm(obj=product)
+   if form.validate_on_submit():
+      product.name = form.name.data
+      product.price = form.price.data
+      db.session.commit()
+      return redirect(url_for('products'))
+   return render_template('edit-product.html', form=form)
+
+
+# Route to delete product detail from the product catalogue and subsequently from the products table
+@app.route("/delete_product/<string:id>", methods=['GET', 'POST'])
+def delete_product(id):
+   product = Product.query.get(id)
+   if product is None:
+      return redirect(url_for('products'))
+   else:
+      db.session.delete(product)
+      db.session.commit()
+   return redirect(url_for('products'))
 
 
 # Pages to handle site errors

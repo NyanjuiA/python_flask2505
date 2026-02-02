@@ -1,0 +1,77 @@
+@charset "utf-8";
+/* CSS document that hold the paths to the webfonts in our site enabling us to use them in our webpages. */
+
+/* Link to the arimo font face. */
+@font-face
+{
+    font-family: 'Arimo';
+    src: url('../webfonts/arimo/Arimo.woff2') format('woff2'),
+        url('../webfonts/arimo/Arimo.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face
+{
+    font-family: 'caviar_dreamsregular';
+    src: url('../webfonts/caviar/caviar_dreams-webfont.woff2') format('woff2'),
+         url('../webfonts/caviar/caviar_dreams-webfont.woff') format('woff'),
+         url('../webfonts/caviar/caviar_dreams-webfont.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+
+@font-face
+{
+    font-family: 'elsieblack';
+    src: url('../webfonts/elsie/elsie-black-webfont.woff2') format('woff2'),
+         url('../webfonts/elsie/elsie-black-webfont.woff') format('woff'),
+         url('../webfonts/elsie/elsie-black-webfont.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Link to the great vibes regular font face. */
+@font-face
+{
+    font-family: 'great_vibesregular';
+    src: url('../webfonts/greatvibes/greatvibes-regular-webfont.woff2') format('woff2'),
+         url('../webfonts/greatvibes/greatvibes-regular-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+/* Link to the gvtime regular font face. */
+@font-face
+{
+    font-family: 'gv._timeregular';
+    src: url('../webfonts/gvtime_regular/gvtimeregular-bw768-webfont.woff2') format('woff2'),
+         url('../webfonts/gvtime_regular/gvtimeregular-bw768-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Link to the limelight regular font face. */
+@font-face
+{
+    font-family: 'limelightregular';
+    src: url('../webfonts/limelight_regular/limelight-webfont.woff2') format('woff2'),
+         url('../webfonts/limelight_regular/limelight-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+/* Link to the sail regular font face. */
+@font-face
+{
+    font-family: 'Sail';
+    src: url('../webfonts/sail/Sail-Regular.woff2') format('woff2'),
+        url('../webfonts/sail/Sail-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
