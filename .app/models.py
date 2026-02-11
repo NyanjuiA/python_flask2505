@@ -36,6 +36,10 @@ class User(db.Model, UserMixin):
       self.password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
       self.password_updated_at = datetime.now(timezone.utc)
 
+   # Method to authenticate the user
+   def check_password(self, password):
+      return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
+
    # Method to check if the user's email alread exists in the database
    @staticmethod
    def check_email_exists(email):
@@ -61,7 +65,7 @@ class User(db.Model, UserMixin):
       """Checks if the user has an admin or manager role"""
       if not self.is_authenticated:
          return False
-      return any(ur.role.name in ['Admin','Manager'] for ur in self.user_roles if ur.is_active)
+      return any(ur.role.name in ['Admin','Manager'] for ur in self.user_role if ur.is_active)
 
    # Method to check whether the user is an admin or manager
    def is_admin(self):
