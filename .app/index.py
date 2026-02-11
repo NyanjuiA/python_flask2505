@@ -227,8 +227,64 @@ def logout():
 
 # Route to add the new user (will be accessed by admins only)
 @app.route("/add-user",methods=['GET','POST'])
+@login_required
 def add_user():
+   # Check if the current user in an admin
+   if not current_user.is_admin_or_manager() or not any(ur.role.name == 'Admin'
+                                                        for ur in current_user.roles if ur.is_active):
+      flash("Access Denied, insufficient permissions!", "danger")
+      return redirect(url_for('index'))
    form = UserForm()
+   if form.validate_on_submit():
+      try:
+         # Check if the user's email already exists
+         if User.query.filter_by(email=form.email.data).first():
+            flash('Email already exists. Please use a different email address.','error')
+            return render_template('add-user.html',form=form)
+
+         # Check if the user's phone already exists
+         if User.query.filter_by(phone=form.phone.data).first():
+            flash('Phone number already exists. Please use a different phone number.', 'error')
+            return render_template('add-user.html', form=form)
+
+         # Create a new user
+         new_user = User(
+            email = form.email.data,
+            full_name = form.full_name.data,
+            birth_date = form.birth_date.data,
+            gender = form.gender.data,
+            phone = form.phone.data,
+            is_active = True
+         )
+
+         # Set the new user's password
+         new_user.set_password(form.password.data)
+
+         # Add the user to the database
+         db.session.add(new_user)
+         db.session.flush()
+
+         # Assign the new user's role
+         role = Role.query.filter_by(name=form.role.data).first()
+         if role:
+            user_role = UserRole(
+               user_id=new_user.id,
+               role_id=role.id,
+               assigned_by=current_user.id,
+               is_active=True
+            )
+            db.session.add(user_role)
+
+         # Persist/save the changes in the database
+         db.session.commit()
+         flash(f"User {new_user.full_name} created successfully "
+               f"with role {form.role.data}!", "success")
+         return redirect(url_for('index'))
+      except Exception as e:
+         db.session.rollback()
+         flash(f"Error creating user:\n{str(e)}", "danger")
+         return render_template('add-user.html', form=form)
+
    return render_template('add-user.html',form=form)
 
 

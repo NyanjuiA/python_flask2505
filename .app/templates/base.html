@@ -31,8 +31,18 @@
             {% if current_user.is_admin_or_manager() %}
                 <li><a href="{{ url_for('add_product') }}">Add Product</a></li>
             {% endif %}
+
+            {# show admin only links #}
+            {% if current_user.is_admin() %}
+                <li><a href="{{ url_for('add_user') }}">Add User</a></li>
+            {% endif %}
+
             {# Display the logout link #}
             <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            {% else %}
+                {# Display the register and login pages for non-authenticated users #}
+                <li><a href="{{ url_for('login') }}">Login</a></li>
+                <li><a href="{{ url_for('register') }}">Register</a></li>
         {% endif %}
     </ul>
 </nav>
@@ -57,5 +67,7 @@
         Designed/Powered by <a href="#" target="_blank">Nyanjui Designs</a>
     </footer>
 </div>
+<!-- Link t the JS to display and hide the navigation menu -->
+<script async src="../static/js/responsive_nav.js"></script>
 </body>
 </html>
