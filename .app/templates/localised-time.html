@@ -1,0 +1,20 @@
+{# The DS 2505 Localised time page #}
+{# Inherit the code from the base template #}
+{% extends 'base.html' %}
+{# specify the page title #}
+{% block page_title %} Localised Time{% endblock page_title %}
+{% block page_heading %}
+    Current Time ⌚
+{% endblock %}
+
+{% block page_content %}
+    <h3 class="section-heading">The current time is: <strong>{{ current_time }}</strong></h3>
+
+    <h2>Change Language</h2>
+    <ul>
+        <li><a href="{{ url_for('show_time',lang='en') }}">English (default)</a> </li>
+        <li><a href="{{ url_for('show_time',lang='fr') }}">Français</a></li>
+        <li><a href="{{ url_for('show_time',lang='de') }}">Deutch</a></li>
+        <li><a href="{{ url_for('show_time',lang='es') }}">Español</a></li>
+    </ul>
+{% endblock %}

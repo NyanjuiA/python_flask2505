@@ -7,8 +7,13 @@ from flask import Flask, render_template, request, url_for, flash, redirect, jso
 from flask_login import current_user, LoginManager
 from flask_login import login_user, logout_user, login_required # For application authentication & authorisation
 from datetime import timezone,datetime
+from typing import Optional
 import secrets
 import string
+
+# Import/get the modules for localisation
+from flask_babel import Babel, format_datetime
+
 
 # Import the registration, login and product form modules
 from register import RegistrationForm
@@ -26,6 +31,10 @@ from tasks import tasks
 # Declare and create/instantiate a flask object
 app = Flask(__name__)
 
+# Add configuration for supported languages
+app.config['BABEL_DEFAULT_LOCALE'] = 'en' # Set 'English' as the application's default language
+app.config['BABEL_SUPPORTED_LOCALES'] = ['en','fr','de','es']
+
 # Application configurations
 # 1. Create the application's secret key to protect our site from CSRF attacks
 app.config['SECRET_KEY'] = secrets.token_urlsafe(32)  # app_key = secrets.token_hex(18)
@@ -38,6 +47,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 init_db(app)
 seed_all(app)
 
+# Instantiate a Babel object and pass our app
+babel = Babel(app)
+
 # Setup Flask_login for the application's login functionality
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -49,16 +61,36 @@ def load_user(user_id):
 
 # Create a guest user to access our unprotected site areas anonymously (unauthenticated access)
 class GuestUser:
-   def __init__(self):
-      self.full_name = "Guest"
-      self.is_authenticated = False
-      self.is_active = False
-      self.is_anonymous = True
+   """
+   Represents an anonymous (unauthenticated) user.
 
-   def is_admin_or_manager(self):
+   This class provides the minimal interface expected by authentication
+   systems such as Flask-Login for users who have not signed in.
+   """
+
+   def __init__(self) -> None:
+      """Initialize a guest user."""
+      self.full_name: str = "Guest"
+      self.is_authenticated: bool = False
+      self.is_active: bool = False
+      self.is_anonymous: bool = True
+
+   def is_admin_or_manager(self) -> bool:
+      """
+      Return whether the guest has administrative privileges.
+
+      Returns:
+          False, since guest users cannot have elevated permissions.
+      """
       return False
 
-   def get_id(self):
+   def get_id(self) -> Optional[str]:
+      """
+      Return the unique identifier for the user.
+
+      Returns:
+          None, since guest users do not have a persistent identifier.
+      """
       return None
 
 # Function to get the user object for the current user, if the current user is authenticated, else
@@ -106,6 +138,18 @@ def index():
    # Display the home page and pass the user_agent variable to it
    return render_template('index.html', user_agent=user_agent)
 
+# Detect the best matching language from the user's request
+def get_locale():
+   return request.args.get('lang','en') # Default to English when no language is selected
+
+babel.init_app(app,locale_selector=get_locale)
+
+# Route to the time page
+@app.route('/time')
+def show_time():
+   current_time = datetime.now()
+   formatted_time = format_datetime(current_time,format='full') # Format the time in a human readable way
+   return render_template('localised-time.html',current_time=formatted_time)
 
 # Set the route to the user's page
 @app.route('/user')
@@ -231,7 +275,7 @@ def logout():
 def add_user():
    # Check if the current user in an admin
    if not current_user.is_admin_or_manager() or not any(ur.role.name == 'Admin'
-                                                        for ur in current_user.roles if ur.is_active):
+                                                        for ur in current_user.user_role if ur.is_active):
       flash("Access Denied, insufficient permissions!", "danger")
       return redirect(url_for('index'))
    form = UserForm()
@@ -304,6 +348,7 @@ def products():
 
 # Route to the add product page (used to add an item/product to the product table)
 @app.route('/add_product', methods=['GET', 'POST'])
+# @login_required
 def add_product():
    form = ProductForm()
    if form.validate_on_submit():

@@ -40,7 +40,7 @@ class User(db.Model, UserMixin):
    def check_password(self, password):
       return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
 
-   # Method to check if the user's email alread exists in the database
+   # Method to check if the user's email already exists in the database
    @staticmethod
    def check_email_exists(email):
       return User.query.filter_by(email=email).first() is not None
@@ -72,7 +72,7 @@ class User(db.Model, UserMixin):
       """Checks if the user has an admin role"""
       if not self.is_authenticated:
          return False
-      return any(ur.role.name == 'Admin' for ur in self.user_roles if ur.is_active)
+      return any(ur.role.name == 'Admin' for ur in self.user_role if ur.is_active)
 
 # Define the Role model/class
 class Role(db.Model):

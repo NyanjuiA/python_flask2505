@@ -25,6 +25,7 @@
         <li><a href="{{ url_for('index') }}">Home</a></li>
         <li><a href="{{ url_for('products') }}">Products</a></li>
         <li><a href="{{ url_for('view_tasks') }}">Tasks</a></li>
+        <li><a href="{{ url_for('show_time') }}">Time</a></li>
         {#  Conditional display of routes/links depending on the user's permission/access level #}
         {% if current_user.is_authenticated %}
             {# show admin/manager only links #}
@@ -54,7 +55,7 @@
     </div>
 {% endif %}
     <h1 class="page-heading">{% block page_heading %} {% endblock %}</h1>
-    {# template block fo the page content #}
+    {# template block for the page content #}
     {% block page_content %} {% endblock %}
     <footer class="page-footer">
         DS 2505 Copyright &copy 2022 -
@@ -67,7 +68,7 @@
         Designed/Powered by <a href="#" target="_blank">Nyanjui Designs</a>
     </footer>
 </div>
-<!-- Link t the JS to display and hide the navigation menu -->
+<!-- Link to the JS to display and hide the navigation menu -->
 <script async src="../static/js/responsive_nav.js"></script>
 </body>
 </html>
